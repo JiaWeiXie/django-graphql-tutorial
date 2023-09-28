@@ -87,6 +87,9 @@ ignore = [
   # pydocstyle: Allow blank line after docstring
   "D202",
 ]
+exclude = [
+  "**/migrations/*",
+]
 
 [tool.ruff.flake8-tidy-imports]
 ban-relative-imports = "all"
@@ -98,3 +101,10 @@ convention = "google"
 pythonVersion = "3.11"
 typeCheckingMode = "basic"
 reportUnnecessaryTypeIgnoreComment = true
+
+[tool.black]
+extend-exclude = '''
+/(
+  | migrations
+)/
+'''
