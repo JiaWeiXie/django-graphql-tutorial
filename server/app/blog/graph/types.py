@@ -1,4 +1,11 @@
+import datetime
+import typing
+import uuid
+
+import strawberry
 import strawberry_django
+from django.db.models import QuerySet
+from strawberry.types import Info
 
 from server.app.blog import models as blog_models
 
@@ -10,24 +17,55 @@ __all__ = (
 )
 
 
-@strawberry_django.type(blog_models.Post, fields="__all__")
+@strawberry_django.type(blog_models.Post)
 class Post:
-    pass
+    id: uuid.UUID  # noqa: A003
+    slug: str
+    author_id: strawberry.ID
+    title: str
+    content: str
+    published_at: datetime.datetime | None
+    published: bool | None
+    tags: list["Tag"]
+    categories: list["Category"]
+
+    @strawberry_django.field
+    def comments(self) -> list["Comment"]:
+        return self.comment_set.all()  # type: ignore
+
+    @classmethod
+    def get_queryset(
+        cls,
+        queryset: QuerySet[blog_models.Post],
+        info: Info,
+        **kwargs: typing.Any,
+    ) -> QuerySet[blog_models.Post]:
+        return queryset.select_related("author").prefetch_related(
+            "tags", "categories", "comment_set"
+        )
 
 
-@strawberry_django.type(blog_models.Comment, fields="__all__")
+@strawberry_django.type(blog_models.Comment)
 class Comment:
-    pass
+    id: uuid.UUID  # noqa: A003
+    post: Post
+    parent: typing.Optional["Comment"]
+    author_id: strawberry.ID | None
+    content: str
 
 
-@strawberry_django.type(blog_models.Tag, fields=["name"])
+@strawberry_django.type(blog_models.Tag)
 class Tag:
-    pass
+    name: str
 
 
-@strawberry_django.type(
-    blog_models.Category,
-    exclude=["created_at", "motified_at"],
-)
+@strawberry_django.type(blog_models.Category)
 class Category:
-    pass
+    id: uuid.UUID  # noqa: A003
+    slug: str
+    parent: typing.Optional["Category"]
+    name: str
+
+    @strawberry_django.field
+    def path(self) -> str:
+        return str(self)
