@@ -2,12 +2,13 @@ import datetime
 import typing
 import uuid
 
-import strawberry
 import strawberry_django
 from django.db.models import QuerySet
 from strawberry.types import Info
 
+from server.app.authentication.graph import types as auth_types
 from server.app.blog import models as blog_models
+from server.app.blog.graph import orders as blog_orders
 
 __all__ = (
     "Post",
@@ -21,7 +22,7 @@ __all__ = (
 class Post:
     id: uuid.UUID  # noqa: A003
     slug: str
-    author_id: strawberry.ID
+    author: auth_types.User
     title: str
     content: str
     published_at: datetime.datetime | None
@@ -41,7 +42,9 @@ class Post:
         **kwargs: typing.Any,
     ) -> QuerySet[blog_models.Post]:
         return queryset.select_related("author").prefetch_related(
-            "tags", "categories", "comment_set"
+            "tags",
+            "categories",
+            "comment_set",
         )
 
 
@@ -50,11 +53,11 @@ class Comment:
     id: uuid.UUID  # noqa: A003
     post: Post
     parent: typing.Optional["Comment"]
-    author_id: strawberry.ID | None
+    author: auth_types.User | None
     content: str
 
 
-@strawberry_django.type(blog_models.Tag)
+@strawberry_django.type(blog_models.Tag, order=blog_orders.TagOrder)
 class Tag:
     name: str
 
