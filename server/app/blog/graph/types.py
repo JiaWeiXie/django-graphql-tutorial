@@ -8,6 +8,7 @@ from strawberry.types import Info
 
 from server.app.authentication.graph import types as auth_types
 from server.app.blog import models as blog_models
+from server.app.blog.graph import filters as blog_filters
 from server.app.blog.graph import orders as blog_orders
 
 __all__ = (
@@ -57,7 +58,11 @@ class Comment:
     content: str
 
 
-@strawberry_django.type(blog_models.Tag, order=blog_orders.TagOrder)
+@strawberry_django.type(
+    blog_models.Tag,
+    order=blog_orders.TagOrder,
+    filters=blog_filters.TagFilter,
+)
 class Tag:
     name: str
 
