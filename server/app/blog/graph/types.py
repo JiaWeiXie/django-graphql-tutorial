@@ -2,6 +2,7 @@ import datetime
 import typing
 import uuid
 
+import strawberry
 import strawberry_django
 from django.db.models import QuerySet
 from strawberry.types import Info
@@ -77,3 +78,30 @@ class Category:
     @strawberry_django.field
     def path(self) -> str:
         return str(self)
+
+
+@strawberry_django.input(blog_models.Post)
+class PostInput:
+    slug: str
+    title: str
+    content: str
+    author: strawberry.auto
+    tags: strawberry.auto
+    categories: strawberry.auto
+
+
+@strawberry_django.partial(blog_models.Post)
+class PostInputPartial:
+    id: strawberry.auto  # noqa: A003
+    slug: strawberry.auto
+    title: strawberry.auto
+    content: strawberry.auto
+    tags: strawberry.auto
+    categories: strawberry.auto
+    published_at: datetime.datetime | None
+    published: bool | None
+
+
+@strawberry_django.input(blog_models.Post)
+class PostIdInput:
+    id: strawberry.auto  # noqa: A003
