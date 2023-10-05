@@ -85,9 +85,9 @@ class PostInput:
     slug: str
     title: str
     content: str
-    author: strawberry.auto
-    tags: strawberry.auto
-    categories: strawberry.auto
+    author: str = strawberry.field(description="Username of the author")
+    tags: list[str] = strawberry.field(description="List of tag names")
+    categories: list[str] = strawberry.field(description="List of category slugs")
 
 
 @strawberry_django.partial(blog_models.Post)
@@ -105,3 +105,35 @@ class PostInputPartial:
 @strawberry_django.input(blog_models.Post)
 class PostIdInput:
     id: strawberry.auto  # noqa: A003
+
+
+@strawberry.interface
+class FormError:
+    field: str
+    message: str
+
+
+@strawberry.type
+class ValidationError(FormError):
+    pass
+
+
+@strawberry.type
+class InvalidChoiceError(FormError):
+    value: str
+
+
+@strawberry.type
+class DuplicateError(FormError):
+    pass
+
+
+@strawberry.type
+class CreatePostResult:
+    post: Post | None = strawberry.UNSET
+    errors: list[
+        typing.Annotated[
+            ValidationError | (InvalidChoiceError | DuplicateError),
+            strawberry.union("FormValidationError"),
+        ]
+    ] | None = strawberry.field(default=None)
