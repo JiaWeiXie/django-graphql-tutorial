@@ -31,6 +31,7 @@ class Post:
     published: bool | None
     tags: list["Tag"]
     categories: list["Category"]
+    cover_image: strawberry.auto
 
     @strawberry_django.field
     def comments(self) -> list["Comment"]:

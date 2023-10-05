@@ -29,6 +29,12 @@ class Post(BaseModel):
         blank=True,
         related_name="posts",
     )
+    cover_image = models.ImageField(
+        "封面圖片",
+        upload_to="post/cover_image/%Y%m%d/",
+        null=True,
+        blank=True,
+    )
 
     def __str__(self) -> str:
         return self.title

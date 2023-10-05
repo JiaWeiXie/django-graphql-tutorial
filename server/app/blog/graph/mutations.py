@@ -5,6 +5,7 @@ import strawberry
 import strawberry_django
 from django.core.exceptions import ValidationError
 from django.utils import timezone
+from strawberry.file_uploads import Upload
 from strawberry.utils.str_converters import to_camel_case
 from strawberry_django import mutations
 
@@ -64,4 +65,15 @@ class Mutation:
             post.published = True
             post.published_at = timezone.now()
             post.save()
+        return typing.cast(blog_types.Post, post)
+
+    @strawberry_django.mutation(handle_django_errors=True)
+    def upload_post_cover_image(
+        self,
+        post_id: uuid.UUID,
+        file: Upload,
+    ) -> blog_types.Post:
+        post = blog_models.Post.objects.get(pk=post_id)
+        post.cover_image = file  # type: ignore
+        post.save()
         return typing.cast(blog_types.Post, post)
