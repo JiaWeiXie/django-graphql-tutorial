@@ -70,3 +70,5 @@ class Mutation:
         auth_types.UserEditInput,
         handle_django_errors=True,
     )
+    login: auth_types.User = strawberry_django.auth.login()  # type: ignore
+    logout: bool = strawberry_django.auth.logout()  # type: ignore
