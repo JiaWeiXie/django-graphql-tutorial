@@ -1,5 +1,6 @@
 import strawberry
 import strawberry_django
+from strawberry import relay
 
 from server.app.blog.graph import filters as blog_filters
 from server.app.blog.graph import orders as blog_orders
@@ -10,9 +11,8 @@ __all__ = ("Query",)
 
 @strawberry.type
 class Query:
-    posts: list[blog_types.Post] = strawberry_django.field(
+    posts: relay.ListConnection[blog_types.Post] = strawberry_django.connection(
         order=blog_orders.PostOrder,
-        pagination=True,
         filters=blog_filters.PostFilter,
     )
     tags: list[blog_types.Tag] = strawberry_django.field()
