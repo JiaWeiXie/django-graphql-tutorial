@@ -5,6 +5,7 @@ import uuid
 import strawberry
 import strawberry_django
 from django.db.models import QuerySet
+from strawberry import relay
 from strawberry.types import Info
 
 from server.app.authentication.graph import types as auth_types
@@ -21,8 +22,8 @@ __all__ = (
 
 
 @strawberry_django.type(blog_models.Post)
-class Post:
-    id: uuid.UUID  # noqa: A003
+class Post(relay.Node):
+    id: relay.NodeID[uuid.UUID]  # noqa: A003
     slug: str
     author: auth_types.User
     title: str
@@ -52,8 +53,8 @@ class Post:
 
 
 @strawberry_django.type(blog_models.Comment)
-class Comment:
-    id: uuid.UUID  # noqa: A003
+class Comment(relay.Node):
+    id: relay.NodeID[uuid.UUID]  # noqa: A003
     post: Post
     parent: typing.Optional["Comment"]
     author: auth_types.User | None
@@ -65,13 +66,14 @@ class Comment:
     order=blog_orders.TagOrder,
     filters=blog_filters.TagFilter,
 )
-class Tag:
+class Tag(relay.Node):
+    id: relay.NodeID[uuid.UUID]  # noqa: A003
     name: str
 
 
 @strawberry_django.type(blog_models.Category)
-class Category:
-    id: uuid.UUID  # noqa: A003
+class Category(relay.Node):
+    id: relay.NodeID[uuid.UUID]  # noqa: A003
     slug: str
     parent: typing.Optional["Category"]
     name: str
@@ -86,26 +88,21 @@ class PostInput:
     slug: str
     title: str
     content: str
+    tags: list[relay.GlobalID]
+    categories: list[relay.GlobalID]
     author: str = strawberry.field(description="Username of the author")
-    tags: list[str] = strawberry.field(description="List of tag names")
-    categories: list[str] = strawberry.field(description="List of category slugs")
 
 
 @strawberry_django.partial(blog_models.Post)
 class PostInputPartial:
-    id: strawberry.auto  # noqa: A003
+    id: relay.GlobalID  # noqa: A003
     slug: strawberry.auto
     title: strawberry.auto
     content: strawberry.auto
-    tags: strawberry.auto
-    categories: strawberry.auto
+    tags: list[relay.GlobalID] | None
+    categories: list[relay.GlobalID] | None
     published_at: datetime.datetime | None
     published: bool | None
-
-
-@strawberry_django.input(blog_models.Post)
-class PostIdInput:
-    id: strawberry.auto  # noqa: A003
 
 
 @strawberry.interface

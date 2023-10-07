@@ -6,8 +6,8 @@ import strawberry_django
 from django.core.exceptions import ValidationError
 from django.utils import timezone
 from strawberry.file_uploads import Upload
+from strawberry.types import Info
 from strawberry.utils.str_converters import to_camel_case
-from strawberry_django import mutations
 
 from server.app.blog import forms as blog_forms
 from server.app.blog import models as blog_models
@@ -44,8 +44,37 @@ def _handle_form_errors(
 
 @strawberry.type
 class Mutation:
-    update_post: blog_types.Post = mutations.update(blog_types.PostInputPartial)
-    delete_post: blog_types.Post = mutations.delete(blog_types.PostIdInput)
+    @strawberry_django.mutation(handle_django_errors=True)
+    def update_post(
+        self,
+        data: blog_types.PostInputPartial,
+        info: Info,
+    ) -> blog_types.Post:
+        post = data.id.resolve_node_sync(info, ensure_type=blog_models.Post)
+        input_data = vars(data)
+        for field, value in input_data.items():
+            if field in ("id", "tags", "categories"):
+                continue
+
+            if value and hasattr(post, field):
+                setattr(post, field, value)
+
+        post.save()
+        if data.tags is not None:
+            tags = [
+                tag_id.resolve_node_sync(info, ensure_type=blog_models.Tag)
+                for tag_id in data.tags
+            ]
+            post.tags.set(tags)
+
+        if data.categories is not None:
+            categories = [
+                category_id.resolve_node_sync(info, ensure_type=blog_models.Category)
+                for category_id in data.categories
+            ]
+            post.categories.set(categories)
+
+        return typing.cast(blog_types.Post, post)
 
     @strawberry_django.mutation
     def create_post(self, data: blog_types.PostInput) -> blog_types.CreatePostResult:
