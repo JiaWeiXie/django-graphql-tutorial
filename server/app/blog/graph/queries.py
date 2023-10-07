@@ -1,6 +1,6 @@
 import strawberry
 import strawberry_django
-from strawberry import relay
+from strawberry_django.relay import ListConnectionWithTotalCount
 
 from server.app.blog.graph import filters as blog_filters
 from server.app.blog.graph import orders as blog_orders
@@ -11,7 +11,7 @@ __all__ = ("Query",)
 
 @strawberry.type
 class Query:
-    posts: relay.ListConnection[blog_types.Post] = strawberry_django.connection(
+    posts: ListConnectionWithTotalCount[blog_types.Post] = strawberry_django.connection(
         order=blog_orders.PostOrder,
         filters=blog_filters.PostFilter,
     )
