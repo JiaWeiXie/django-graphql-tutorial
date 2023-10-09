@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django_extensions",
+    "strawberry_django",
     "server.app.blog",
     "server.app.authentication",
 ]

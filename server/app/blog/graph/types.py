@@ -7,6 +7,9 @@ import strawberry_django
 from django.db.models import QuerySet
 from strawberry import relay
 from strawberry.types import Info
+from strawberry_django.permissions import (
+    HasRetvalPerm,
+)
 
 from server.app.authentication.graph import types as auth_types
 from server.app.blog import models as blog_models
@@ -30,7 +33,9 @@ class Post(relay.Node):
     content: str
     published_at: datetime.datetime | None
     published: bool | None
-    tags: list["Tag"]
+    tags: list["Tag"] = strawberry_django.field(
+        extensions=[HasRetvalPerm("blog.change_post")],
+    )
     categories: list["Category"]
     cover_image: strawberry.auto
 
