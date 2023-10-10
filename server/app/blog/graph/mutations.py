@@ -3,6 +3,9 @@ import uuid
 
 import strawberry
 import strawberry_django
+from asgiref.sync import async_to_sync
+from channels.layers import get_channel_layer
+from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.utils import timezone
 from strawberry.file_uploads import Upload
@@ -57,6 +60,18 @@ def _handle_form_errors(
                     field=to_camel_case(field),
                     message=err.message % err.params if err.params else err.message,
                 )
+
+
+def notify_new_post(post: blog_models.Post) -> None:
+    channel_layer = get_channel_layer()
+    group_send = async_to_sync(channel_layer.group_send)  # type: ignore
+    group_send(
+        settings.POSTS_CHANNEL,
+        {
+            "type": "chat.message",
+            "post_id": post.pk,
+        },
+    )
 
 
 @strawberry.type
@@ -120,6 +135,8 @@ class Mutation:
             post.published = True
             post.published_at = timezone.now()
             post.save()
+
+        notify_new_post(post)
         return typing.cast(blog_types.Post, post)
 
     @strawberry_django.mutation(handle_django_errors=True)

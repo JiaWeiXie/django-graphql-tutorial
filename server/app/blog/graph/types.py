@@ -140,3 +140,10 @@ class CreatePostResult:
             strawberry.union("FormValidationError"),
         ]
     ] | None = strawberry.field(default=None)
+
+
+@strawberry.type
+class PostNotification(relay.Node):
+    id: relay.NodeID[uuid.UUID]  # noqa: A003
+    title: str
+    publish_at: datetime.datetime

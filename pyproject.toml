@@ -11,6 +11,8 @@ django = "^4.2.5"
 strawberry-graphql-django = "^0.17.4"
 django-extensions = "^3.2.3"
 pillow = "^10.0.1"
+strawberry-graphql = {extras = ["channels"], version = "^0.209.6"}
+daphne = "^4.0.0"
 
 
 [tool.poetry.group.dev.dependencies]
