@@ -1,3 +1,5 @@
+import typing
+
 import strawberry
 import strawberry_django
 from django.contrib.auth import get_user_model
@@ -7,6 +9,10 @@ __all__ = (
     "UserRegisterInput",
     "UserEditInput",
 )
+
+
+if typing.TYPE_CHECKING:
+    from server.app.blog.graph.types import Post
 
 USER_MODEL = get_user_model()
 
@@ -18,6 +24,12 @@ class User:
     first_name: str
     last_name: str
     email: str
+    posts: list[
+        typing.Annotated[
+            "Post",
+            strawberry.lazy("server.app.blog.graph.types"),
+        ]
+    ]
     is_superuser: bool = strawberry.field(default=False)
     is_staff: bool = strawberry.field(default=False)
     is_active: bool = strawberry.field(default=True)

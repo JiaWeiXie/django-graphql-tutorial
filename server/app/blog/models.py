@@ -12,6 +12,7 @@ class Post(BaseModel):
         USER_MODEL,
         verbose_name="作者",
         on_delete=models.CASCADE,
+        related_name="posts",
     )
     title = models.CharField("標題", max_length=255)
     content = models.TextField("內文")

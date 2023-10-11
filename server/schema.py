@@ -1,5 +1,6 @@
 import strawberry
 import strawberry.tools
+from graphql_sync_dataloaders import DeferredExecutionContext
 
 from server.app.authentication.graph import mutations as auth_mutations
 from server.app.authentication.graph import queries as auth_queries
@@ -30,5 +31,9 @@ subscription = strawberry.tools.merge_types(
 )
 
 
-schema = strawberry.Schema(query=query, mutation=mutation)
+schema = strawberry.Schema(
+    query=query,
+    mutation=mutation,
+    execution_context_class=DeferredExecutionContext,
+)
 ws_schema = strawberry.Schema(query=query, subscription=subscription)

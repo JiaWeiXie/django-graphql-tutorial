@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django_extensions",
+    "debug_toolbar",
     "strawberry_django",
     "server.app.blog",
     "server.app.authentication",
@@ -52,6 +53,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "strawberry_django.middlewares.debug_toolbar.DebugToolbarMiddleware",
 ]
 
 ROOT_URLCONF = "server.urls"
@@ -139,3 +141,8 @@ CHANNEL_LAYERS = {
 }
 
 POSTS_CHANNEL = "posts_notifications"
+
+INTERNAL_IPS = [
+    "127.0.0.1",
+    "localhost",
+]

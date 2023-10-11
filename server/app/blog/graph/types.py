@@ -12,6 +12,7 @@ from strawberry_django.permissions import (
 )
 
 from server.app.authentication.graph import types as auth_types
+from server.app.authentication.graph.dataloader import user_loader
 from server.app.blog import models as blog_models
 from server.app.blog.graph import filters as blog_filters
 from server.app.blog.graph import orders as blog_orders
@@ -28,7 +29,7 @@ __all__ = (
 class Post(relay.Node):
     id: relay.NodeID[uuid.UUID]  # noqa: A003
     slug: str
-    author: auth_types.User
+    author_id: strawberry.Private[int]
     title: str
     content: str
     published_at: datetime.datetime | None
@@ -40,21 +41,26 @@ class Post(relay.Node):
     cover_image: strawberry.auto
 
     @strawberry_django.field
+    def author(self) -> auth_types.User:
+        user = user_loader.load(self.author_id)
+        return typing.cast(auth_types.User, user)
+
+    @strawberry_django.field
     def comments(self) -> list["Comment"]:
         return self.comment_set.all()  # type: ignore
 
-    @classmethod
-    def get_queryset(
-        cls,
-        queryset: QuerySet[blog_models.Post],
-        info: Info,
-        **kwargs: typing.Any,
-    ) -> QuerySet[blog_models.Post]:
-        return queryset.select_related("author").prefetch_related(
-            "tags",
-            "categories",
-            "comment_set",
-        )
+    # @classmethod
+    # def get_queryset(
+    #     cls,
+    #     queryset: QuerySet[blog_models.Post],
+    #     info: Info,
+    #     **kwargs: typing.Any,
+    # ) -> QuerySet[blog_models.Post]:
+    #     return queryset.select_related("author").prefetch_related(
+    #         "tags",
+    #         "categories",
+    #         "comment_set",
+    #     )
 
 
 @strawberry_django.type(blog_models.Comment)
