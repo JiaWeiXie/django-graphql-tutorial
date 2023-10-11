@@ -1,6 +1,7 @@
 import strawberry
 import strawberry.tools
 from graphql_sync_dataloaders import DeferredExecutionContext
+from strawberry_django.optimizer import DjangoOptimizerExtension
 
 from server.app.authentication.graph import mutations as auth_mutations
 from server.app.authentication.graph import queries as auth_queries
@@ -35,5 +36,6 @@ schema = strawberry.Schema(
     query=query,
     mutation=mutation,
     execution_context_class=DeferredExecutionContext,
+    extensions=[DjangoOptimizerExtension],
 )
 ws_schema = strawberry.Schema(query=query, subscription=subscription)

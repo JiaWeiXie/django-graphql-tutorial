@@ -54,6 +54,7 @@ class Comment(BaseModel):
         Post,
         verbose_name="文章",
         on_delete=models.CASCADE,
+        related_name="comments",
     )
     parent = models.ForeignKey(
         "self",

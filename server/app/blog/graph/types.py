@@ -4,15 +4,12 @@ import uuid
 
 import strawberry
 import strawberry_django
-from django.db.models import QuerySet
 from strawberry import relay
-from strawberry.types import Info
 from strawberry_django.permissions import (
     HasRetvalPerm,
 )
 
 from server.app.authentication.graph import types as auth_types
-from server.app.authentication.graph.dataloader import user_loader
 from server.app.blog import models as blog_models
 from server.app.blog.graph import filters as blog_filters
 from server.app.blog.graph import orders as blog_orders
@@ -29,7 +26,7 @@ __all__ = (
 class Post(relay.Node):
     id: relay.NodeID[uuid.UUID]  # noqa: A003
     slug: str
-    author_id: strawberry.Private[int]
+    author: auth_types.User
     title: str
     content: str
     published_at: datetime.datetime | None
@@ -39,15 +36,11 @@ class Post(relay.Node):
     )
     categories: list["Category"]
     cover_image: strawberry.auto
+    comments: list["Comment"]
 
-    @strawberry_django.field
-    def author(self) -> auth_types.User:
-        user = user_loader.load(self.author_id)
-        return typing.cast(auth_types.User, user)
-
-    @strawberry_django.field
-    def comments(self) -> list["Comment"]:
-        return self.comment_set.all()  # type: ignore
+    # @strawberry_django.field
+    # def comments(self) -> list["Comment"]:
+    #     return self.comment_set.all()  # type: ignore
 
     # @classmethod
     # def get_queryset(
