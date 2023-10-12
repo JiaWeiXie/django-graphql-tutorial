@@ -18,3 +18,4 @@ class Query:
     tags: list[blog_types.Tag] = strawberry_django.field()
     categories: list[blog_types.Category] = strawberry_django.field()
     comments: list[blog_types.Comment] = strawberry_django.field()
+    test_error: float = strawberry.field(resolver=lambda: 1 / 0)
