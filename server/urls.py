@@ -20,9 +20,11 @@ from django.urls import include, path
 from strawberry.django.views import GraphQLView
 
 from server.schema import schema
+from server.utils.views import ApolloSandboxView
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("graphql/", GraphQLView.as_view(schema=schema)),
+    path("graphql/", GraphQLView.as_view(schema=schema, graphiql=False)),
     path("__debug__/", include("debug_toolbar.urls")),
+    path("sandbox/", ApolloSandboxView.as_view()),
 ]
